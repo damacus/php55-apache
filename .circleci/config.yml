@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       - image: golang:latest
-    working_directory: /go/src/github.com/${CIRCLE_PROJECT_REPONAME}
+    working_directory: /go/src/github.com/php55-apache
     environment:
       PROJECT: php55-apache 
     steps:
@@ -20,7 +20,7 @@ jobs:
             mv /tmp/docker/* /usr/bin
       - run:
           name: Build
-          command: ./build.sh
+          command: docker build --build-arg date=$(date +%Y-%m-%dT%T%z) -t damacus/php55-apache:latest . 
       - deploy:
           name: Push
           context: org-global
