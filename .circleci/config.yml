@@ -1,0 +1,45 @@
+version: 2
+jobs:
+  build_and_push:
+    docker:
+      - image: golang:latest
+    working_directory: /go/src/github.com/${CIRCLE_PROJECT_REPONAME}
+    environment:
+      PROJECT: php55-apache 
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 17.05.0-ce
+      - run:
+          name: Install Docker client
+          command: |
+            set -x
+            VER="17.05.0-ce"
+            curl -L -o /tmp/docker.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker.tgz
+            mv /tmp/docker/* /usr/bin
+      - run:
+          name: Build
+          command: ./build.sh
+      - deploy:
+          name: Push
+          context: org-global
+          command: |
+            TAG=$CIRCLE_BUILD_NUM
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+              echo "--- Build Images ---"
+              docker images damacus/${PROJECT}
+              docker tag damacus/${PROJECT}:latest damacus/${PROJECT}:$TAG
+              docker push damacus/${PROJECT}:$TAG
+              docker push damacus/${PROJECT}:latest
+            else
+              echo "Not on master so not tagging"
+              docker images
+            fi
+workflows:
+  version: 2
+  build_and_push:
+    jobs:
+      - build_and_push:
+          context: org-global
