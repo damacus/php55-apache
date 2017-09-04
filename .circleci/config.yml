@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build_and_push:
+  build:
     docker:
       - image: golang:latest
     working_directory: /go/src/github.com/${CIRCLE_PROJECT_REPONAME}
@@ -39,7 +39,7 @@ jobs:
             fi
 workflows:
   version: 2
-  build_and_push:
+  build:
     jobs:
-      - build_and_push:
+      - build:
           context: org-global
